@@ -1,3 +1,156 @@
---defining variables 
-local playercash
-local playerraincollected
+-- Advanced Rain System Script
+-- ServerScriptService
+
+local Debris = game:GetService("Debris")
+local RunService = game:GetService("RunService")
+
+--------------------------------------------------
+-- RAIN TYPES CONFIG
+--------------------------------------------------
+local RainTypes = {
+    Light = {
+        Rate = 0.12,
+        Speed = 50,
+        MoistureValue = 1,
+        Color = Color3.fromRGB(120, 190, 255),
+        Chance = 45
+    },
+
+    Normal = {
+        Rate = 0.07,
+        Speed = 75,
+        MoistureValue = 2,
+        Color = Color3.fromRGB(0, 170, 255),
+        Chance = 35
+    },
+
+    Heavy = {
+        Rate = 0.04,
+        Speed = 100,
+        MoistureValue = 3,
+        Color = Color3.fromRGB(0, 120, 255),
+        Chance = 15
+    },
+
+    Storm = {
+        Rate = 0.025,
+        Speed = 130,
+        MoistureValue = 5,
+        Color = Color3.fromRGB(160, 160, 255),
+        Chance = 5
+    }
+}
+
+--------------------------------------------------
+-- RAIN AREA SETTINGS
+--------------------------------------------------
+local RainArea = {
+    MinX = -200,
+    MaxX = 200,
+    MinZ = -200,
+    MaxZ = 200,
+    Height = 120
+}
+
+--------------------------------------------------
+-- CURRENT WEATHER STATE
+--------------------------------------------------
+local CurrentRainType = "Normal"
+local StormActive = false
+
+--------------------------------------------------
+-- PICK RANDOM RAIN TYPE
+--------------------------------------------------
+local function chooseRainType()
+    local roll = math.random(1, 100)
+    local counter = 0
+
+    for name, data in pairs(RainTypes) do
+        counter += data.Chance
+        if roll <= counter then
+            return name
+        end
+    end
+
+    return "Normal"
+end
+
+--------------------------------------------------
+-- SPAWN RAIN DROP
+--------------------------------------------------
+local function spawnRainDrop(rainName)
+    local data = RainTypes[rainName]
+
+    local drop = Instance.new("Part")
+    drop.Size = Vector3.new(0.25, 0.25, 0.25)
+    drop.Shape = Enum.PartType.Ball
+    drop.Material = Enum.Material.Neon
+    drop.Color = data.Color
+    drop.CanCollide = false
+    drop.Anchored = false
+    drop.Name = "RainDrop"
+
+    drop:SetAttribute("MoistureValue", data.MoistureValue)
+
+    drop.Position = Vector3.new(
+        math.random(RainArea.MinX, RainArea.MaxX),
+        RainArea.Height,
+        math.random(RainArea.MinZ, RainArea.MaxZ)
+    )
+
+    drop.Parent = workspace
+
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, -data.Speed, 0)
+    bodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
+    bodyVelocity.Parent = drop
+
+    Debris:AddItem(drop, 6)
+end
+
+--------------------------------------------------
+-- RAIN LOOP
+--------------------------------------------------
+task.spawn(function()
+    while true do
+        spawnRainDrop(CurrentRainType)
+        task.wait(RainTypes[CurrentRainType].Rate)
+    end
+end)
+
+--------------------------------------------------
+-- WEATHER CYCLE
+--------------------------------------------------
+task.spawn(function()
+    while true do
+        task.wait(math.random(45, 90))
+
+        CurrentRainType = chooseRainType()
+
+        if CurrentRainType == "Storm" then
+            StormActive = true
+        else
+            StormActive = false
+        end
+    end
+end)
+
+--------------------------------------------------
+-- OPTIONAL: LIGHTNING DURING STORM
+--------------------------------------------------
+task.spawn(function()
+    while true do
+        if StormActive then
+            local flash = Instance.new("Part")
+            flash.Size = Vector3.new(500, 500, 500)
+            flash.Anchored = true
+            flash.Transparency = 0.85
+            flash.Color = Color3.new(1, 1, 1)
+            flash.Material = Enum.Material.Neon
+            flash.Parent = workspace
+
+            Debris:AddItem(flash, 0.15)
+        end
+        task.wait(math.random(8, 15))
+    end
+end)
