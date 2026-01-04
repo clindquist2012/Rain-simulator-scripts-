@@ -1,0 +1,104 @@
+-- Services
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SideUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Side Button Frame
+local sideFrame = Instance.new("Frame")
+sideFrame.Size = UDim2.new(0, 140, 0, 180)
+sideFrame.Position = UDim2.new(0, 10, 0.35, 0)
+sideFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+sideFrame.Parent = screenGui
+sideFrame.BorderSizePixel = 0
+
+-- Rounded corners
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = sideFrame
+
+-- Button creator
+local function createButton(text, yPos)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(1, -20, 0, 45)
+	button.Position = UDim2.new(0, 10, 0, yPos)
+	button.Text = text
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 14
+	button.Parent = sideFrame
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = button
+
+	return button
+end
+
+-- Buttons
+local shopButton = createButton("Shop", 10)
+local sellButton = createButton("Sell", 65)
+local gamepassButton = createButton("Gamepass", 120)
+
+-- Bottom-left info
+local infoFrame = Instance.new("Frame")
+infoFrame.Size = UDim2.new(0, 250, 0, 50)
+infoFrame.Position = UDim2.new(0, 10, 1, -60)
+infoFrame.BackgroundTransparency = 1
+infoFrame.Parent = screenGui
+
+-- Rain Capacity
+local capacityLabel = Instance.new("TextLabel")
+capacityLabel.Size = UDim2.new(1, 0, 0, 25)
+capacityLabel.Text = "Rain Capacity: 0"
+capacityLabel.TextColor3 = Color3.new(1, 1, 1)
+capacityLabel.TextXAlignment = Enum.TextXAlignment.Left
+capacityLabel.BackgroundTransparency = 1
+capacityLabel.Font = Enum.Font.Gotham
+capacityLabel.TextSize = 14
+capacityLabel.Parent = infoFrame
+
+-- Username
+local usernameLabel = Instance.new("TextLabel")
+usernameLabel.Size = UDim2.new(1, 0, 0, 25)
+usernameLabel.Position = UDim2.new(0, 0, 0, 25)
+usernameLabel.Text = "User: " .. player.Name
+usernameLabel.TextColor3 = Color3.new(1, 1, 1)
+usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+usernameLabel.BackgroundTransparency = 1
+usernameLabel.Font = Enum.Font.GothamBold
+usernameLabel.TextSize = 14
+usernameLabel.Parent = infoFrame
+
+-- Leaderstats support
+local function updateCapacity()
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local cap = leaderstats:FindFirstChild("RainCapacity")
+		if cap then
+			capacityLabel.Text = "Rain Capacity: " .. cap.Value
+			cap.Changed:Connect(function()
+				capacityLabel.Text = "Rain Capacity: " .. cap.Value
+			end)
+		end
+	end
+end
+
+updateCapacity()
+
+-- Button clicks
+shopButton.MouseButton1Click:Connect(function()
+	print("Shop opened")
+end)
+
+sellButton.MouseButton1Click:Connect(function()
+	print("Sell clicked")
+end)
+
+gamepassButton.MouseButton1Click:Connect(function()
+	print("Gamepass opened")
+end)
